@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Shared form styles, used by <Input>, <Select> and <Textarea> in components/ui.jsx */
+@layer components {
+  .field {
+    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink
+      focus:border-blood focus:outline-none focus:ring-2 focus:ring-blood/20;
+  }
+}
+
+body {
+  @apply bg-canvas text-ink antialiased;
+}
