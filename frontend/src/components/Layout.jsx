@@ -1,7 +1,3 @@
-/*
-  The frame around every logged-in page: sidebar menu + main content area.
-  The menu items depend on the user's role.
-*/
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../api/client'

@@ -1,12 +1,9 @@
-/*
-  All the pages (routes) of the app.
-  URL -> page component. Pages are grouped by role.
-*/
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { homePath, useAuth } from './context/AuthContext'
 
+import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Notifications from './pages/Notifications'
@@ -33,6 +30,7 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Alert, Button, Field, Input, Select } from '../components/ui'
-import { homePath, useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 import { BLOOD_GROUPS, errorMessage } from '../utils/format'
 import { AuthShell } from './Login'
 
@@ -22,17 +22,26 @@ export default function Register() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    // Only send donor details when registering as a donor
-    const payload = { role: form.role, full_name: form.full_name, email: form.email, phone: form.phone, password: form.password }
+
+    const payload = { 
+      role: form.role, 
+      full_name: form.full_name, 
+      email: form.email, 
+      phone: form.phone, 
+      password: form.password 
+    }
+
     if (isDonor) {
       payload.blood_group = form.blood_group
       payload.city = form.city
       if (form.gender) payload.gender = form.gender
       if (form.date_of_birth) payload.date_of_birth = form.date_of_birth
     }
+
     try {
-      const user = await register(payload)
-      navigate(homePath(user.role))
+      await register(payload)
+      // Redirect to the OTP verification page passing the email as a query parameter
+      navigate(`/verify-otp?email=${encodeURIComponent(form.email)}`)
     } catch (err) {
       setError(errorMessage(err))
     } finally {
