@@ -5,8 +5,11 @@ Everyone who uses the system is a User. The `role` field decides what they
 can do: donor, hospital manager, or system admin. Users log in with their
 email address instead of a username.
 """
+from time import timezone
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+import random
 
 
 class UserManager(BaseUserManager):
@@ -42,6 +45,17 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20, blank=True)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.DONOR)
+
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(blank=True, null=True)
+    is_email_verified = models.BooleanField(default=False)
+
+    def generate_otp(self):
+        otp = str(random.randint(100000, 999999))
+        self.otp_code = otp
+        self.otp_created_at = timezone.now()
+        self.save()
+        return otp
 
     # Used to block login after too many wrong passwords
     failed_login_attempts = models.PositiveIntegerField(default=0)

@@ -6,6 +6,7 @@ which database to use (SQLite), how login tokens work, and a few project
 rules such as the 90-day donation interval.
 """
 from datetime import timedelta
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ INSTALLED_APPS = [
     # Third-party packages
     "rest_framework",
     "corsheaders",
-    # Our apps (one per part of the system)
+    # my apps (one per part of the system)
     "accounts",       # users, roles, login
     "donors",         # donor profiles and eligibility
     "hospitals",      # hospital registration and verification
@@ -112,3 +113,14 @@ CORS_ALLOWED_ORIGINS = [
 DONATION_INTERVAL_DAYS = 90   # days a donor must wait between donations
 MAX_LOGIN_ATTEMPTS = 5        # failed logins before the account is locked
 LOCKOUT_MINUTES = 15          # how long the lock lasts
+
+
+
+
+# for actual email dispatches (using Gmail App Password):
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')

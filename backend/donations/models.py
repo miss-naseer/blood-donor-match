@@ -4,7 +4,7 @@ Donation requests and appointments.
 A DonationRequest connects one donor and one hospital. It can be started by
 the donor ("I want to donate here") or by the hospital ("we need your blood group").
 
-Status flow (see the state diagram, Figure 3.6):
+Status flow :
   pending -> approved -> scheduled -> confirmed -> completed
   pending -> declined
   scheduled -> reschedule_requested -> scheduled

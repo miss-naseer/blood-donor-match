@@ -15,6 +15,39 @@ from .models import User
 from .permissions import IsAdminRole
 from .serializers import RegisterSerializer, UserSerializer
 
+from rest_framework.views import APIView
+from django.core.mail import send_mail
+
+
+# Trigger email sending upon successful registration
+def send_otp_email(user):
+    otp = user.generate_otp()
+    subject = "BloodMatch Account Verification OTP"
+    message = f"Hello {user.first_name},\n\nYour account verification OTP code is: {otp}\nThis code is valid for 10 minutes."
+    send_mail(subject, message, 'noreply@bloodmatch.com', [user.email])
+
+class VerifyOTPView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        otp_entered = request.data.get('otp')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if OTP matches and is not expired (10 mins limit)
+        if user.otp_code == otp_entered:
+            if timezone.now() - user.otp_created_at < timedelta(minutes=10):
+                user.is_email_verified = True
+                user.is_active = True
+                user.otp_code = None  # Clear OTP after use
+                user.save()
+                return Response({'message': 'Email verified successfully! You can now log in.'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'OTP has expired. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'error': 'Invalid OTP code.'}, status=status.HTTP_400_BAD_REQUEST) 
 
 def tokens_for(user):
     """Create a JWT access token (sent with every request) and a refresh token."""

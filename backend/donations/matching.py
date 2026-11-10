@@ -2,7 +2,7 @@
 Donor matching rules (the MatchingService in the class diagram).
 
 A hospital asks for a blood group. We find donors who:
-  1. have a COMPATIBLE blood group (table below, Table 3.10 in Chapter 3),
+  1. have a COMPATIBLE blood group,
   2. are marked as available, and
   3. are ELIGIBLE (90 days have passed since their last donation).
 """
