@@ -11,5 +11,5 @@ urlpatterns = [
     path("me/", views.me),
     path("users/", views.user_list),
     path("users/<int:pk>/toggle-active/", views.toggle_user_active),
-    path('api/auth/verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
+    path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
 ]

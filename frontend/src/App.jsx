@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { homePath, useAuth } from './context/AuthContext'
+import VerifyOTPPage from './pages/VerifyOTPPage'
 
 import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
@@ -33,6 +34,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/verify-otp" element={<VerifyOTPPage />} />
 
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         {/* Donor */}

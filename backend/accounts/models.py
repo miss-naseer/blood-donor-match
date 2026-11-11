@@ -5,11 +5,11 @@ Everyone who uses the system is a User. The `role` field decides what they
 can do: donor, hospital manager, or system admin. Users log in with their
 email address instead of a username.
 """
-from time import timezone
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 import random
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):

@@ -8,6 +8,9 @@ rules such as the 90-day donation interval.
 from datetime import timedelta
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -115,12 +118,31 @@ MAX_LOGIN_ATTEMPTS = 5        # failed logins before the account is locked
 LOCKOUT_MINUTES = 15          # how long the lock lasts
 
 
-
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # for actual email dispatches (using Gmail App Password):
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Email Configuration
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
+
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = False
+
+EMAIL_HOST_USER = 'salmanasgee@gmail.com'
+EMAIL_HOST_PASSWORD = 'abcdefghijklmnop'
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

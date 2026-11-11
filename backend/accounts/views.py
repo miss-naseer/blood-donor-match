@@ -10,35 +10,37 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
+from django.core.mail import send_mail
 
 from .models import User
 from .permissions import IsAdminRole
 from .serializers import RegisterSerializer, UserSerializer
 
-from rest_framework.views import APIView
-from django.core.mail import send_mail
-
 
 # Trigger email sending upon successful registration
 def send_otp_email(user):
     otp = user.generate_otp()
-    subject = "BloodMatch Account Verification OTP"
-    message = f"Hello {user.first_name},\n\nYour account verification OTP code is: {otp}\nThis code is valid for 10 minutes."
-    send_mail(subject, message, 'noreply@bloodmatch.com', [user.email])
+    subject = "Blood Donor Match Account Verification OTP"
+    message = f"Hello {user.full_name},\n\nYour account verification OTP code is: {otp}\nThis code is valid for 10 minutes."
+    send_mail(subject, message, getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@blooddonormatch.com'), [user.email])
+
 
 class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        email = request.data.get('email')
-        otp_entered = request.data.get('otp')
+        email = str(request.data.get('email', '')).strip().lower()
+        otp_entered = str(request.data.get('otp', '')).strip()  
 
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(email__iexact=str(email).strip())
         except User.DoesNotExist:
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if OTP matches and is not expired (10 mins limit)
         if user.otp_code == otp_entered:
-            if timezone.now() - user.otp_created_at < timedelta(minutes=10):
+            if user.otp_created_at and (timezone.now() - user.otp_created_at < timedelta(minutes=10)):
                 user.is_email_verified = True
                 user.is_active = True
                 user.otp_code = None  # Clear OTP after use
@@ -47,7 +49,8 @@ class VerifyOTPView(APIView):
             else:
                 return Response({'error': 'OTP has expired. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response({'error': 'Invalid OTP code.'}, status=status.HTTP_400_BAD_REQUEST) 
+        return Response({'error': 'Invalid OTP code.'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 def tokens_for(user):
     """Create a JWT access token (sent with every request) and a refresh token."""
@@ -61,8 +64,20 @@ def register(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
-    # Log the new user in straight away
-    return Response({**tokens_for(user), "user": UserSerializer(user).data}, status=status.HTTP_201_CREATED)
+
+    # Deactivate account until OTP verification completes
+    user.is_active = False
+    user.is_email_verified = False
+    user.save(update_fields=["is_active", "is_email_verified"])
+
+    # Generate and send OTP code
+    send_otp_email(user)
+
+    # Return success response WITHOUT generating session tokens
+    return Response({
+        "message": "Registration successful! Please verify your email with the OTP sent.",
+        "email": user.email
+    }, status=status.HTTP_201_CREATED)
 
 
 @api_view(["POST"])
@@ -88,6 +103,10 @@ def login(request):
                 user.failed_login_attempts = 0
             user.save(update_fields=["failed_login_attempts", "locked_until"])
         return Response({"detail": "Invalid email or password."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if hasattr(user, 'is_email_verified') and not user.is_email_verified:
+        return Response({"detail": "Please verify your email via OTP before logging in."},
+                        status=status.HTTP_403_FORBIDDEN)
 
     if not user.is_active:
         return Response({"detail": "Your account has been deactivated. Please contact the administrator."},

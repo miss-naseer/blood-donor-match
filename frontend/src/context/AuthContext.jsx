@@ -27,7 +27,8 @@ export function AuthProvider({ children }) {
 
   async function register(form) {
     const { data } = await api.post('/auth/register/', form)
-    return saveSession(data)
+    // Return API response data directly without triggering saveSession
+    return data
   }
 
   function updateUser(newUser) {
