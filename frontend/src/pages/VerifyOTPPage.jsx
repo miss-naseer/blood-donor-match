@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth, homePath } from '../context/AuthContext';
 
 const VerifyOTPPage = () => {
   const [otp, setOtp] = useState('');
@@ -10,6 +10,7 @@ const VerifyOTPPage = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const { verifyOtp } = useAuth();
   
   // Extract email from query parameter: /verify-otp?email=user@example.com
   const searchParams = new URLSearchParams(location.search);
@@ -22,9 +23,9 @@ const VerifyOTPPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/verify-otp/', { email, otp });
-      setMessage(response.data.message || 'Email verified successfully! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 2000);
+      const loggedInUser = await verifyOtp(email, otp);
+      setMessage('Email verified successfully! Redirecting to your dashboard...');
+      setTimeout(() => navigate(homePath(loggedInUser.role)), 1500);
     } catch (err) {
       setError(err.response?.data?.error || 'Verification failed. Please check your code and try again.');
     } finally {

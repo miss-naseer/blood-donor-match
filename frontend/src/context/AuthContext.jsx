@@ -25,6 +25,11 @@ export function AuthProvider({ children }) {
     return saveSession(data)
   }
 
+  async function verifyOtp(email, otp) {
+    const { data } = await api.post('/auth/verify-otp/', { email, otp })
+    return saveSession(data)
+  }
+
   async function register(form) {
     const { data } = await api.post('/auth/register/', form)
     // Return API response data directly without triggering saveSession
@@ -43,7 +48,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, login, register, verifyOtp, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

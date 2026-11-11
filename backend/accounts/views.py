@@ -45,7 +45,11 @@ class VerifyOTPView(APIView):
                 user.is_active = True
                 user.otp_code = None  # Clear OTP after use
                 user.save()
-                return Response({'message': 'Email verified successfully! You can now log in.'}, status=status.HTTP_200_OK)
+                return Response({
+                      'message': 'Email verified successfully!',
+                      **tokens_for(user),
+                      'user': UserSerializer(user).data,
+                  }, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'OTP has expired. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
         
